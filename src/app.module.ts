@@ -7,15 +7,16 @@ import config from './config/config';
 import { UserModule } from './app/user/user.module';
 import { AuthModule } from './app/auth/auth.module';
 import { UploadModule } from './app/upload/upload.module';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
-  // env consifg
-  ConfigModule.forRoot(),
+    // env consifg
+    ConfigModule.forRoot(),
 
-  // database module
-     TypeOrmModule.forRoot({
-      type: 'postgres', 
-       host: config.database.host,
+    // database module
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: config.database.host,
       port: config.database.port,
       username: config.database.user,
       password: config.database.password,
@@ -26,6 +27,12 @@ import { UploadModule } from './app/upload/upload.module';
       logging: true,
     }),
 
+    // jwt module
+    JwtModule.register({
+      global: true,
+      secret: config.jwtSecret,
+      signOptions: { expiresIn: '10d' },
+    }),
 
     // user module
     UserModule,
@@ -38,4 +45,4 @@ import { UploadModule } from './app/upload/upload.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

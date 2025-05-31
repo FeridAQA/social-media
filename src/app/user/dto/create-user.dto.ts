@@ -27,7 +27,7 @@ export class CreateUserDto {
   @Type()
   @IsString()
   @Length(5, 30)
-  @ApiProperty()
+  @ApiProperty({default:'ferid'})
   userName: string;
 
   @Type()
@@ -38,7 +38,7 @@ export class CreateUserDto {
   @Type()
   @IsString()
   @Length(3, 150)
-  @ApiProperty()
+  @ApiProperty({default:'feridferid'})
   password: string;
 
   @Type()

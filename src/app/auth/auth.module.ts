@@ -7,12 +7,7 @@ import config from 'src/config/config';
 
 @Module({
   imports: [UserModule,
-    // jwt module
-    JwtModule.register({
-      global: true,
-      secret: config.jwtSecret,
-      signOptions: { expiresIn: '10d' },
-    }),
+    
   ],
   controllers: [AuthController],
   providers: [AuthService],
