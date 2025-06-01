@@ -1,7 +1,7 @@
 import { ConflictException, Global, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/database/entities/User.entity";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 
 @Global()
@@ -27,5 +27,9 @@ export class UserService {
         await user.save();
 
         return  user
+    }
+
+    async update(id:number, params:Partial<User>) {
+        await this.userRepo.update({id}, params);
     }
 }

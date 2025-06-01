@@ -24,4 +24,23 @@ export class AuthController {
   register(@Body() body : RegisterUserDto){
     return this.authService.register(body);
   }
+
+// Experimental url
+  @Get('forget_password')
+  renderForgetPassword(@Res() res: Response) {
+    res.setHeader('content-type', 'text/html');
+    res.sendFile(join(__dirname, '../../templates/forget_password_ui.hbs'));
+  }
+
+
+  @Post('forget-password')
+  forgetPassword(@Body() body: ForgetPasswordDto) {
+    return this.authService.forgetPassword(body);
+  }
+
+  @Post('reset_password')
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
+  }
+  
 }

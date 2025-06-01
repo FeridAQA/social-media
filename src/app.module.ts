@@ -8,6 +8,10 @@ import { UserModule } from './app/user/user.module';
 import { AuthModule } from './app/auth/auth.module';
 import { UploadModule } from './app/upload/upload.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 @Module({
   imports: [
     // env consifg
@@ -32,6 +36,30 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
       secret: config.jwtSecret,
       signOptions: { expiresIn: '10d' },
+    }),
+
+
+    // smtp
+
+    MailerModule.forRoot({
+      transport: {
+        host:'smtp.gmail.com',
+        port: 587,
+        auth: {
+          user: "afe681a2@gmail.com",
+          pass: "wdxouhbkahubarjn",
+        },
+      },
+      defaults: {
+        from: config.smtp.from,
+      },
+      template: {
+        dir: join(__dirname, 'templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
     }),
 
     // user module

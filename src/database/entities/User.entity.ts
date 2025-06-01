@@ -40,6 +40,12 @@ export class User extends CommonEntity {
     })
     gender: UserGender;
 
+    @Column({nullable: true})
+    activationToken:string;
+
+    @Column({nullable: true})
+    activationExpire: Date;
+
 
     @Column({
         type: 'enum',
@@ -49,10 +55,18 @@ export class User extends CommonEntity {
     roles: UserRole[];
 
 
+
+
     // Hash password before saving to the database
     @BeforeInsert()
     beforeInsert() {
         this.password = bcrypt.hashSync(this.password, 10);
     }
+
+
+    get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+  
 
 }

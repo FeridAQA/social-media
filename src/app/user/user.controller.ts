@@ -9,6 +9,12 @@ import { AuthorizedRequest } from "src/shared/interface/auth.interface";
 export class UserController {
     constructor(private userService:UserService) { }
 
+    @Get('/allUsers')
+    getAllUsers() {
+        return this.userService.findone({});    
+    }
+
+
     @Get('/profile')
     @ApiBearerAuth()
     @UseGuards(AuthGard)
