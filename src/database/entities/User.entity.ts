@@ -22,9 +22,18 @@ export class User extends CommonEntity {
     @Column()
     password: string;
 
-    //    @Column({ nullable: true })
-    @Column({nullable: true,})
+    @Column({ nullable: true, })
     bio: string;
+
+
+    @Column({ default: 0 })
+    followerCount: number;
+
+    @Column({ default: 0 })
+    followedCount: number;
+
+    @Column({ default: false })
+    isPrivate: boolean;
 
     @OneToOne(() => ImageEntity, { eager: true, nullable: true })
     @JoinColumn()
@@ -32,7 +41,7 @@ export class User extends CommonEntity {
 
 
     @Column()
-    birthDate   : Date;
+    birthDate: Date;
 
     @Column({
         type: "enum",
@@ -40,10 +49,10 @@ export class User extends CommonEntity {
     })
     gender: UserGender;
 
-    @Column({nullable: true})
-    activationToken:string;
+    @Column({ nullable: true })
+    activationToken: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     activationExpire: Date;
 
 
@@ -65,8 +74,8 @@ export class User extends CommonEntity {
 
 
     get fullName() {
-    return `${this.firstName} ${this.lastName}`;
-  }
-  
+        return `${this.firstName} ${this.lastName}`;
+    }
+
 
 }

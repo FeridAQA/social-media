@@ -12,6 +12,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ClsGuard, ClsModule } from 'nestjs-cls';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
     // env consifg
@@ -43,7 +45,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 
     MailerModule.forRoot({
       transport: {
-        host:'smtp.gmail.com',
+        host: 'smtp.gmail.com',
         port: 587,
         auth: {
           user: "afe681a2@gmail.com",
@@ -62,6 +64,13 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       },
     }),
 
+    // cls 
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
+      guard:{mount: true},
+    }),
+
     // user module
     UserModule,
     // auth module
@@ -71,6 +80,11 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     UploadModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+     {
+            provide: APP_GUARD,
+            useClass: ClsGuard,
+        },
+  ],
 })
 export class AppModule { }

@@ -18,7 +18,6 @@ async function bootstrap() {
     .setTitle('Cats example')
     .setDescription('The cats API description')
     .setVersion('1.0')
-    .addTag('cats')
     .addBearerAuth()
     .build();
     
