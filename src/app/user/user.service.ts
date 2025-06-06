@@ -6,6 +6,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { SearchUserDto } from "./dto/search-user.dto";
 import { FindUserParams } from "./dto/user.types";
 import { SEARCH_USER_SELECT } from "./dto/user.select";
+import { ClsService } from "nestjs-cls";
 
 @Global()
 @Injectable()
@@ -13,7 +14,10 @@ import { SEARCH_USER_SELECT } from "./dto/user.select";
 export class UserService {
     constructor(
         @InjectRepository(User)
-        private userRepo: Repository<User>) { }
+        private userRepo: Repository<User>,
+        private cls: ClsService
+    ) { }
+
 
     async findAll(where?: FindOptionsWhere<User> | FindOptionsWhere<User>[]) {
         return this.userRepo.find({ where });
@@ -55,8 +59,9 @@ export class UserService {
         await this.userRepo.update({ id }, params);
     }
 
-    search(params: SearchUserDto) {
+    async search(params: SearchUserDto) {
         const { searchParam, limit = 10, page = 0 } = params;
+        const myUser = await this.cls.get<User>('user')
         const where: FindOptionsWhere<User>[] = [
             {
                 userName: ILike(`${searchParam}%`),
@@ -71,7 +76,25 @@ export class UserService {
                 lastName: ILike(`%${searchParam}%`),
             },
         ];
-        return this.find({where,select:SEARCH_USER_SELECT,page,limit})
+
+        let relations = ['followers','followers.followedUser']
+
+
+        let users = this.find({ where, select: SEARCH_USER_SELECT, page, limit, relations })
+
+        let mappedUsers = (await users).map((user) => {
+            let isFollowing =user.followers.find(
+                (follow) => follow.followedUser.id === myUser.id
+            )!==undefined
+
+            return {
+                ...user,
+                isFollowing,
+                followers: undefined
+            }
+        })
+
+        return mappedUsers
     }
 
 }

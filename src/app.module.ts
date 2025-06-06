@@ -14,6 +14,7 @@ import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ClsGuard, ClsModule } from 'nestjs-cls';
 import { APP_GUARD } from '@nestjs/core';
+import { FollowModule } from './app/follow/follow.module';
 @Module({
   imports: [
     // env consifg
@@ -68,7 +69,7 @@ import { APP_GUARD } from '@nestjs/core';
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true },
-      guard:{mount: true},
+      guard: { mount: true },
     }),
 
     // user module
@@ -78,13 +79,16 @@ import { APP_GUARD } from '@nestjs/core';
 
     // upload module
     UploadModule,
+
+    // follow module
+    FollowModule
   ],
   controllers: [AppController],
   providers: [AppService,
-     {
-            provide: APP_GUARD,
-            useClass: ClsGuard,
-        },
+    {
+      provide: APP_GUARD,
+      useClass: ClsGuard,
+    },
   ],
 })
 export class AppModule { }

@@ -29,7 +29,7 @@ export class AuthService {
   ) { }
 
   async logIn(param: LoginUserDto) {
-    let user = await this.userService.findone([{ userName: param.userName }, { email: param.userName }]);
+    let user = await this.userService.findOne([{ userName: param.userName }, { email: param.userName }]);
 
     if (!user) {
       throw new HttpException('Invalid username or password', 400);
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   async forgetPassword(params: ForgetPasswordDto) {
-    let user = await this.userService.findone({ email: params.email });
+    let user = await this.userService.findOne({ email: params.email });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -108,7 +108,7 @@ export class AuthService {
   }
 
   async resetPassword(params: ResetPasswordDto) {
-    let user = await this.userService.findone(
+    let user = await this.userService.findOne(
       { email: params.email },
     );
     if (!user) throw new NotFoundException();
