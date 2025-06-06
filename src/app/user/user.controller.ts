@@ -26,7 +26,7 @@ export class UserController {
     @UseGuards(AuthGard)
     myProfile() {
         let user = this.cls.get<User>('user');
-        return this.userService.findOne({ id: user.id });
+        return this.userService.findOne({where:{ id: user.id }});
     }
 
 
@@ -34,7 +34,7 @@ export class UserController {
     @ApiBearerAuth()
     @UseGuards(AuthGard)
     async userProfile(@Param('id') id: number) {
-        let user = await this.userService.findOne({ id });
+        let user = await this.userService.userProfile(id );
         if (!user) throw new NotFoundException();
         return user;
     }

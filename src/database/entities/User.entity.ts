@@ -50,11 +50,11 @@ export class User extends CommonEntity {
     })
     gender: UserGender;
 
-    @OneToMany(()=>Follow ,(follow)=>follow.followedUser)
-    followeds:Follow[] // özünün elədikləri
+    @OneToMany(()=>Follow ,(follow)=>follow.followed)
+    iFolloweds:Follow[] // özünün elədikləri
 
-    @OneToMany(()=>Follow,(follow)=>follow.followerUser)
-    followers:Follow[] // onu eliyənlər
+    @OneToMany(()=>Follow,(follow)=>follow.follower)
+    myFollowers:Follow[] // onu eliyənlər
 
     @Column({ nullable: true })
     activationToken: string;

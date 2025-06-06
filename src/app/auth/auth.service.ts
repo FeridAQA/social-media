@@ -29,7 +29,17 @@ export class AuthService {
   ) { }
 
   async logIn(param: LoginUserDto) {
-    let user = await this.userService.findOne([{ userName: param.userName }, { email: param.userName }]);
+    let user = await this.userService.findOne(
+      {
+        where: [{ userName: param.userName }, { email: param.userName }],
+        // select: {
+        //   id: true,
+        //   userName: true,
+        //   email: true,
+        //   password: true, // Burada sahələr doğru şəkildə `true` olaraq göstərilir
+        // },
+      }
+    );
 
     if (!user) {
       throw new HttpException('Invalid username or password', 400);
@@ -45,7 +55,10 @@ export class AuthService {
 
     };
 
+
     let token = this.jwtService.sign(payload);
+
+    user.password = undefined
 
     return {
       token,
@@ -75,7 +88,7 @@ export class AuthService {
   }
 
   async forgetPassword(params: ForgetPasswordDto) {
-    let user = await this.userService.findOne({ email: params.email });
+    let user = await this.userService.findOne({ where: { email: params.email } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -109,7 +122,7 @@ export class AuthService {
 
   async resetPassword(params: ResetPasswordDto) {
     let user = await this.userService.findOne(
-      { email: params.email },
+      { where: { email: params.email } },
     );
     if (!user) throw new NotFoundException();
     if (user.activationToken != params.token)

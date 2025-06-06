@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   UseGuards
 } from '@nestjs/common';
@@ -16,9 +18,26 @@ import { FollowService } from './follow.service';
 export class FollowController {
   constructor(private followService: FollowService) {}
 
+  @Get('requests')
+  followRequests() {
+    return this.followService.followRequests();
+  }
+
+  
+
   @Post()
   createFollow(@Body() body: CreateFollowDto) {
     return this.followService.create(body);
+  }
+
+  @Post('/accept/:userId')
+  acceptFollow(@Param('userId') userId: number) {
+    return this.followService.accept(userId);
+  }
+
+  @Post('/reject/:userId')
+  rejectFollow(@Param('userId') userId: number) {
+    return this.followService.reject(userId);
   }
  
 }

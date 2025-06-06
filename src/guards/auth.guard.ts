@@ -34,7 +34,7 @@ export class AuthGard implements CanActivate {
 
       if (!payload.userId) throw new Error('No userId in token');
 
-      let user = await this.userService.findOne({ id: payload.userId });
+      let user = await this.userService.findOne({where:{ id: payload.userId }});
 
       if (!user) throw new Error('User not found');
 
