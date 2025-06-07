@@ -14,12 +14,14 @@ export class UploadService {
   ) {}
 
   async uploadImage(req: Request, file: Express.Multer.File) {
+
+    
     let port = req.socket.localPort;
     let image = this.imageRepo.create({
       filename: file.filename,
       url: `${req.protocol}://${req.hostname}${port ? `:${port}` : ''}/uploads/${file.filename}`,
     });
-
+    
     await image.save();
     return image;
   }

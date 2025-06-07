@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { UserService } from "./user.service";
 import { AuthGard } from "src/guards/auth.guard";
@@ -6,13 +6,14 @@ import { AuthorizedRequest } from "src/shared/interface/auth.interface";
 import { SearchUserDto } from "./dto/search-user.dto";
 import { ClsService } from "nestjs-cls";
 import { User } from "src/database/entities/User.entity";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Controller('user')
 @ApiTags('User')
 export class UserController {
     constructor(
         private userService: UserService,
-        private cls:ClsService
+        private cls: ClsService
     ) { }
 
     @Get('/allUsers')
@@ -26,7 +27,7 @@ export class UserController {
     @UseGuards(AuthGard)
     myProfile() {
         let user = this.cls.get<User>('user');
-        return this.userService.findOne({where:{ id: user.id }});
+        return this.userService.findOne({ where: { id: user.id } });
     }
 
 
@@ -34,9 +35,16 @@ export class UserController {
     @ApiBearerAuth()
     @UseGuards(AuthGard)
     async userProfile(@Param('id') id: number) {
-        let user = await this.userService.userProfile(id );
+        let user = await this.userService.userProfile(id);
         if (!user) throw new NotFoundException();
         return user;
+    }
+
+    @Post('profile')
+    @ApiBearerAuth()
+    @UseGuards(AuthGard)
+    async updateProfile(@Body() body: UpdateUserDto) {
+        return this.userService.updateProfile(body);
     }
 
 

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ImageEntity } from 'src/database/entities/Image.entity';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { extname, join } from 'path';
 import { diskStorage } from 'multer';
+import { ImageEntity } from 'src/database/entities/Image.entity';
 
 @Module({
   imports: [

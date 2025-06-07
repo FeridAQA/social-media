@@ -15,6 +15,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { ClsGuard, ClsModule } from 'nestjs-cls';
 import { APP_GUARD } from '@nestjs/core';
 import { FollowModule } from './app/follow/follow.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 @Module({
   imports: [
     // env consifg
@@ -70,6 +71,13 @@ import { FollowModule } from './app/follow/follow.module';
       global: true,
       middleware: { mount: true },
       guard: { mount: true },
+    }),
+
+  
+    // uplouds 
+    ServeStaticModule.forRoot({
+      serveRoot:'/uploads',
+      rootPath: join(__dirname, '..', 'uploads'),
     }),
 
     // user module

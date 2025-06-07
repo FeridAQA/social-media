@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -40,4 +41,8 @@ export class FollowController {
     return this.followService.reject(userId);
   }
  
+  @Delete('/unfollow/:userId')
+  unfollow(@Param('userId') userId: number) {
+    return this.followService.unfollow(userId);
+  }
 }

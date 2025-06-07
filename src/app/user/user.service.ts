@@ -1,7 +1,7 @@
 import { ConflictException, Global, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/database/entities/User.entity";
-import { DeepPartial, FindManyOptions, FindOptionsWhere, ILike, Repository } from "typeorm";
+import { DeepPartial, FindManyOptions, FindOptionsWhere, ILike, Not, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { SearchUserDto } from "./dto/search-user.dto";
 import { USER_BASIC_SELECT, USER_PROFILE_SELECT } from "./user.select";
@@ -9,6 +9,7 @@ import { ClsService } from "nestjs-cls";
 import { NotFoundError } from "rxjs";
 import { FollowStatus } from "src/shared/enum/follow.enum";
 import { FindParams } from "src/shared/types/find.params";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Global()
 @Injectable()
@@ -74,7 +75,7 @@ export class UserService {
 
 
     async update(id: number, params: Partial<User>) {
-        await this.userRepo.update({ id }, params);
+       return await this.userRepo.update({ id }, params);
     }
 
     async search(params: SearchUserDto) {
@@ -113,6 +114,34 @@ export class UserService {
         })
 
         return mappedUsers
+    }
+
+
+    async updateProfile(params: Partial<UpdateUserDto>) {
+        let myUser = await this.cls.get<User>('user')
+
+        let payload: Partial<User> = {};
+
+        for (let key in params) {
+            switch (key) {
+                case 'profilePictureId':
+                    payload.profilePicture = {
+                        id: params.profilePictureId
+                    }
+                    break
+                case 'userName':
+                    let checkUserName = await this.findOne({ where: { userName: params.userName, id: Not(myUser.id) } });
+                    if (checkUserName && checkUserName.id !== myUser.id) throw new ConflictException("Username already exists");
+                    payload.userName = params.userName
+                    break
+                default:
+                    payload[key] = params[key]
+                    break
+
+            }
+        }
+      return  this.update(myUser.id, payload)
+
     }
 
 }

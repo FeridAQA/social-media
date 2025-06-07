@@ -38,7 +38,7 @@ export class User extends CommonEntity {
 
     @OneToOne(() => ImageEntity, { eager: true, nullable: true })
     @JoinColumn()
-    profilePicture: ImageEntity;
+    profilePicture: Partial<ImageEntity>;
 
 
     @Column()
@@ -50,11 +50,11 @@ export class User extends CommonEntity {
     })
     gender: UserGender;
 
-    @OneToMany(()=>Follow ,(follow)=>follow.followed)
-    iFolloweds:Follow[] // özünün elədikləri
+    @OneToMany(() => Follow, (follow) => follow.followed)
+    iFolloweds: Follow[] // özünün elədikləri
 
-    @OneToMany(()=>Follow,(follow)=>follow.follower)
-    myFollowers:Follow[] // onu eliyənlər
+    @OneToMany(() => Follow, (follow) => follow.follower)
+    myFollowers: Follow[] // onu eliyənlər
 
     @Column({ nullable: true })
     activationToken: string;
