@@ -47,11 +47,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.gmail.com',
-        port: 587,
+        host: config.smtp.host,
+        port: config.smtp.port,
         auth: {
-          user: "afe681a2@gmail.com",
-          pass: "wdxouhbkahubarjn",
+          user: config.smtp.user,
+          pass: config.smtp.password,
         },
       },
       defaults: {
