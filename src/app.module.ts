@@ -16,6 +16,7 @@ import { ClsGuard, ClsModule } from 'nestjs-cls';
 import { APP_GUARD } from '@nestjs/core';
 import { FollowModule } from './app/follow/follow.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { PostModule } from './app/post/post.module';
 @Module({
   imports: [
     // env consifg
@@ -73,10 +74,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       guard: { mount: true },
     }),
 
-  
+
     // uplouds 
     ServeStaticModule.forRoot({
-      serveRoot:'/uploads',
+      serveRoot: '/uploads',
       rootPath: join(__dirname, '..', 'uploads'),
     }),
 
@@ -89,7 +90,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     UploadModule,
 
     // follow module
-    FollowModule
+    FollowModule,
+
+    // post module
+    PostModule
   ],
   controllers: [AppController],
   providers: [AppService,

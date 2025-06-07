@@ -17,14 +17,14 @@ import { FollowService } from './follow.service';
 @ApiTags('Follow')
 @UseGuards(AuthGard)
 export class FollowController {
-  constructor(private followService: FollowService) {}
+  constructor(private followService: FollowService) { }
 
   @Get('requests')
   followRequests() {
     return this.followService.followRequests();
   }
 
-  
+
 
   @Post()
   createFollow(@Body() body: CreateFollowDto) {
@@ -40,7 +40,12 @@ export class FollowController {
   rejectFollow(@Param('userId') userId: number) {
     return this.followService.reject(userId);
   }
- 
+
+  @Delete('/remove/:userId')
+  removeFollow(@Param('userId') userId: number) {
+    return this.followService.removeFollow(userId);
+  }
+
   @Delete('/unfollow/:userId')
   unfollow(@Param('userId') userId: number) {
     return this.followService.unfollow(userId);

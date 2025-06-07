@@ -6,6 +6,7 @@ export const USER_BASIC_SELECT: FindOptionsSelect<User> = {
     userName: true,
     firstName: true,
     lastName: true,
+    isPrivate:true,
     profilePicture: {
         url: true,
     },
