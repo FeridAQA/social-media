@@ -79,8 +79,6 @@ export class AuthService {
         },
 
       });
-
-      console.log(user.fullName);
     } catch (err) {
       console.log('Email send error', err);
     }
