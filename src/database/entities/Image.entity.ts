@@ -13,6 +13,6 @@ export class ImageEntity extends CommonEntity {
 
   @BeforeRemove()
   beforeRemove() {
-    rmSync(join(__dirname, '../../uploads', this.filename));
+    rmSync(join(__dirname, '../../../uploads', this.filename));
   }
 }
