@@ -17,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { FollowModule } from './app/follow/follow.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PostModule } from './app/post/post.module';
+import { ChatModule } from './app/chat/chat.module';
 @Module({
   imports: [
     // env consifg
@@ -93,7 +94,10 @@ import { PostModule } from './app/post/post.module';
     FollowModule,
 
     // post module
-    PostModule
+    PostModule,
+
+    // chat module
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService,
