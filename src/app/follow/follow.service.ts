@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException
 } from '@nestjs/common';
@@ -19,7 +21,11 @@ import { FOLLOW_REQUEST_LIST_SELECT } from './follow.select';
 export class FollowService {
   constructor(
     private cls: ClsService,
+    
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
+
+    
     @InjectRepository(Follow)
     private followRepo: Repository<Follow>,
   ) { }
@@ -48,8 +54,8 @@ export class FollowService {
       throw new ConflictException('You already follow this user');
     }
     let follow = this.followRepo.create({
-      follower: {id:user.id},
-      followed: {id:myUser.id},
+      follower: { id: user.id },
+      followed: { id: myUser.id },
       status: user.isPrivate ? FollowStatus.WAITING : FollowStatus.FOLLOWING
     });
 
@@ -76,7 +82,7 @@ export class FollowService {
 
         // follower user gonderilen 
         follower: { id: myUser.id },
-        
+
       }
     },
     );
@@ -194,7 +200,7 @@ export class FollowService {
 
 
 
-   async followRequests() {
+  async followRequests() {
     let myUser = await this.cls.get<User>('user');
 
     return this.find({
@@ -205,6 +211,18 @@ export class FollowService {
       relations: ['followed'],
       select: FOLLOW_REQUEST_LIST_SELECT,
     });
+  }
+
+  async acceptAllRequsts(userId: number) {
+    return await this.followRepo.update(
+      {
+        status: FollowStatus.WAITING,
+        follower: {
+          id: userId,
+        },
+      },
+      { status: FollowStatus.FOLLOWING },
+    );
   }
 
 }

@@ -1,13 +1,13 @@
 import { Global, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Type } from "class-transformer";
 import { User } from "src/database/entities/User.entity";
-import { UserService } from "./user.service";
 import { UserController } from "./user.controller";
+import { UserService } from "./user.service";
+import { FollowModule } from "../follow/follow.module";
 
 @Global()
 @Module({
-    imports: [TypeOrmModule.forFeature([User])], // Add your entities here
+    imports: [TypeOrmModule.forFeature([User]),FollowModule], // Add your entities here
     controllers: [UserController],
     providers: [UserService],
     exports: [UserService],

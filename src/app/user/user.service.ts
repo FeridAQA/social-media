@@ -1,4 +1,4 @@
-import { ConflictException, Global, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, forwardRef, Global, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/database/entities/User.entity";
 import { DeepPartial, FindManyOptions, FindOptionsWhere, ILike, Not, Repository } from "typeorm";
@@ -10,6 +10,7 @@ import { NotFoundError } from "rxjs";
 import { FollowStatus } from "src/shared/enum/follow.enum";
 import { FindParams } from "src/shared/types/find.params";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { FollowService } from "../follow/follow.service";
 
 @Global()
 @Injectable()
@@ -18,7 +19,10 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private userRepo: Repository<User>,
-        private cls: ClsService
+        private cls: ClsService,
+
+        @Inject(forwardRef(() => FollowService))
+        private followService: FollowService,
     ) { }
 
 
@@ -75,7 +79,7 @@ export class UserService {
 
 
     async update(id: number, params: Partial<User>) {
-       return await this.userRepo.update({ id }, params);
+        return await this.userRepo.update({ id }, params);
     }
 
     async search(params: SearchUserDto) {
@@ -124,6 +128,13 @@ export class UserService {
 
         for (let key in params) {
             switch (key) {
+                case 'isPrivate':
+                    payload.isPrivate = params.isPrivate;
+                    if (params.isPrivate === false) {
+                        await this.followService.acceptAllRequsts(myUser.id);
+                    }
+
+                    break;
                 case 'profilePictureId':
                     payload.profilePicture = {
                         id: params.profilePictureId
@@ -140,7 +151,7 @@ export class UserService {
 
             }
         }
-      return  this.update(myUser.id, payload)
+        return this.update(myUser.id, payload)
 
     }
 
