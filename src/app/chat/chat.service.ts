@@ -13,12 +13,12 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { CHAT_LIST_SELECT, CHAT_MESSAGES_SELECT } from './chat.select';
 import { GetChatMessagesDto } from './dto/get-chat-messages.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { RedisService } from 'src/shared/libs/redis/redis.service';
+import { RedisService } from 'src/shared/libs/redis/redis.service';
 
 @Injectable()
 export class ChatService {
   constructor(
-    // private redisService: RedisService,
+    private redisService: RedisService,
     private eventEmitter: EventEmitter2,
     private cls: ClsService,
     @InjectRepository(Chat)
@@ -37,6 +37,13 @@ export class ChatService {
 
   async getChats() {
     const myUser = await this.cls.get<User>('user')
+
+
+    let cacheData = await this.redisService.get(`chatlist${myUser.id}`);
+    if (cacheData) {
+      console.log('DATA FROM CACHE');
+      return JSON.parse(cacheData.toString());
+    }
 
     let chats = await this.chatRepo
       .createQueryBuilder('chat')
@@ -61,6 +68,8 @@ export class ChatService {
         participants: undefined,
       };
     });
+
+    await this.redisService.set(`chatlist${myUser.id}`, JSON.stringify(result));
 
     return result;
   }
@@ -114,7 +123,7 @@ export class ChatService {
 
 
 
-   async findOrCreateChat(params: { chatId?: number; userId?: number }) {
+  async findOrCreateChat(params: { chatId?: number; userId?: number }) {
     let { chatId, userId } = params;
     let isNew = false;
 
@@ -212,11 +221,11 @@ export class ChatService {
     }
     this.eventEmitter.emit('message.create', { chat, message });
 
-    // await Promise.all(
-    //   chat.participants.map((p) =>
-    //     this.redisService.delete(`chatlist${p.user.id}`),
-    //   ),
-    // );
+    await Promise.all(
+      chat.participants.map((p) =>
+        this.redisService.delete(`chatlist${p.user.id}`),
+      ),
+    );
 
     return {
       status: true,

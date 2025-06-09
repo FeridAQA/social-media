@@ -32,4 +32,10 @@ export default {
   // App url
   appUrl: process.env.APP_URL,
 
+  // Redis 
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: +process.env.REDIS_PORT,
+  },
+
 }

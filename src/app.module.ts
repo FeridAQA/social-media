@@ -20,6 +20,7 @@ import { PostModule } from './app/post/post.module';
 import { ChatModule } from './app/chat/chat.module';
 import { SocketModule } from './app/socket/socket.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RedisModule } from './shared/libs/redis/redis.module';
 @Module({
   imports: [
     // env consifg
@@ -86,6 +87,13 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
     // EventEmitterModule
     EventEmitterModule.forRoot(),
+
+    // Redis
+    RedisModule.register({
+      host: config.redis.host,
+      port: config.redis.port,
+      }),
+
 
     // user module
     UserModule,

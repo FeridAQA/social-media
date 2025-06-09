@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   redis:
-    image: redis:MySocialMedia
+    image: redis:latest
     ports:
       - '3005:6379' # Map port 3005 on the host to port 6379 on the Redis container
     volumes:
