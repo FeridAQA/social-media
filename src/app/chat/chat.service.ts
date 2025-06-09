@@ -56,6 +56,7 @@ export class ChatService {
       .leftJoin('participants.user', 'users')
       .leftJoin('chat.participants', 'myParticipant')
       .where(`myParticipant.userId=:userId`, { userId: myUser.id })
+      .orderBy('lastMessage.createdAt', 'DESC') 
       .getMany()
 
     let result = chats.map((chat) => {
