@@ -112,14 +112,23 @@ export class ChatService {
 
     const myUser = await this.cls.get<User>('user')
 
+    if (myUser.id === userId)
+      throw new BadRequestException('You can not send message to yourself');
+    
     let chat: any
     if (userId) {
       chat = await this.chatRepo
         .createQueryBuilder('chat')
         .leftJoinAndSelect('chat.participants', 'participants')
         .leftJoinAndSelect('participants.user', 'users')
-        .where(`users.id In(:...ids)`, { ids: [myUser.id, userId] })
+        .innerJoin('chat.participants', 'p1', 'p1.userId = :myUserId', {
+          myUserId: myUser.id,
+        })
+        .innerJoin('chat.participants', 'p2', 'p2.userId = :userId', {
+          userId,
+        })
         .getOne()
+
       if (!chat) {
         chat = this.chatRepo.create({
           isGroup: false,
