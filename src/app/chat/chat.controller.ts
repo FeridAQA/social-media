@@ -12,6 +12,7 @@ import { AuthGard } from 'src/guards/auth.guard';
 import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { GetChatMessagesDto } from './dto/get-chat-messages.dto';
+import { CreateGroupDto } from './dto/create-group.dto';
 
 @Controller('chat')
 @ApiTags('Chat')
@@ -38,5 +39,10 @@ export class ChatController {
   @Post()
   sendMessage(@Body() body: SendMessageDto) {
     return this.chatService.sendMessage(body)
+  }
+
+  @Post('/group')
+  createGroup(@Body() body: CreateGroupDto) {
+    return this.chatService.createGroup(body);
   }
 }

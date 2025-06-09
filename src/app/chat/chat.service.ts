@@ -14,6 +14,7 @@ import { CHAT_LIST_SELECT, CHAT_MESSAGES_SELECT } from './chat.select';
 import { GetChatMessagesDto } from './dto/get-chat-messages.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RedisService } from 'src/shared/libs/redis/redis.service';
+import { CreateGroupDto } from './dto/create-group.dto';
 
 @Injectable()
 export class ChatService {
@@ -231,6 +232,24 @@ export class ChatService {
       status: true,
       message: 'Message is sent',
     };
+  }
+
+
+   async createGroup(body: CreateGroupDto) {
+    const { userIds, name } = body;
+
+    const myUser = await this.cls.get<User>('user');
+    let chat = this.chatRepo.create({
+      isGroup: true,
+      name,
+      participants: [...userIds, myUser.id].map((id) => ({
+        user: {
+          id,
+        },
+      })),
+    });
+    await chat.save();
+    return chat;
   }
 }
 
