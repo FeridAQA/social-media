@@ -235,7 +235,7 @@ export class ChatService {
   }
 
 
-   async createGroup(body: CreateGroupDto) {
+  async createGroup(body: CreateGroupDto) {
     const { userIds, name } = body;
 
     const myUser = await this.cls.get<User>('user');
@@ -248,6 +248,11 @@ export class ChatService {
         },
       })),
     });
+    await Promise.all(
+      chat.participants.map((p) =>
+        this.redisService.delete(`chatlist${p.user.id}`),
+      ),
+    );
     await chat.save();
     return chat;
   }
