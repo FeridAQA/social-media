@@ -18,6 +18,8 @@ import { FollowModule } from './app/follow/follow.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PostModule } from './app/post/post.module';
 import { ChatModule } from './app/chat/chat.module';
+import { SocketModule } from './app/socket/socket.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     // env consifg
@@ -82,6 +84,9 @@ import { ChatModule } from './app/chat/chat.module';
       rootPath: join(__dirname, '..', 'uploads'),
     }),
 
+    // EventEmitterModule
+    EventEmitterModule.forRoot(),
+
     // user module
     UserModule,
     // auth module
@@ -98,6 +103,9 @@ import { ChatModule } from './app/chat/chat.module';
 
     // chat module
     ChatModule,
+
+    // Socet module
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [AppService,

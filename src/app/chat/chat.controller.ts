@@ -37,6 +37,6 @@ export class ChatController {
 
   @Post()
   sendMessage(@Body() body: SendMessageDto) {
-    return this.chatService.sendMesssage(body)
+    return this.chatService.sendMessage(body)
   }
 }

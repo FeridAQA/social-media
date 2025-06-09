@@ -12,20 +12,27 @@ import { Repository } from 'typeorm';
 import { SendMessageDto } from './dto/send-message.dto';
 import { CHAT_LIST_SELECT, CHAT_MESSAGES_SELECT } from './chat.select';
 import { GetChatMessagesDto } from './dto/get-chat-messages.dto';
-// import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 // import { RedisService } from 'src/shared/libs/redis/redis.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     // private redisService: RedisService,
-    // private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2,
     private cls: ClsService,
     @InjectRepository(Chat)
     private chatRepo: Repository<Chat>,
     @InjectRepository(MessageEntity)
     private messageRepo: Repository<MessageEntity>,
   ) { }
+
+  findById(id: number) {
+    return this.chatRepo.findOne({
+      where: { id },
+      relations: ['participants', 'participants.user'],
+    });
+  }
 
 
   async getChats() {
@@ -107,19 +114,20 @@ export class ChatService {
 
 
 
-  async findOrCreateChat(params: { chatId?: number; userId?: number }) {
-    let { chatId, userId } = params
+   async findOrCreateChat(params: { chatId?: number; userId?: number }) {
+    let { chatId, userId } = params;
+    let isNew = false;
 
-    const myUser = await this.cls.get<User>('user')
+    const myUser = await this.cls.get<User>('user');
 
     if (myUser.id === userId)
       throw new BadRequestException('You can not send message to yourself');
-    
-    let chat: any
+
+    let chat: Chat;
     if (userId) {
       chat = await this.chatRepo
         .createQueryBuilder('chat')
-        .leftJoinAndSelect('chat.participants', 'participants')
+        .leftJoinAndSelect(`chat.participants`, 'participants')
         .leftJoinAndSelect('participants.user', 'users')
         .innerJoin('chat.participants', 'p1', 'p1.userId = :myUserId', {
           myUserId: myUser.id,
@@ -127,71 +135,93 @@ export class ChatService {
         .innerJoin('chat.participants', 'p2', 'p2.userId = :userId', {
           userId,
         })
-        .getOne()
+        .getOne();
 
       if (!chat) {
         chat = this.chatRepo.create({
           isGroup: false,
           participants: [
             {
-              user: { id: myUser.id }
+              user: {
+                id: myUser.id,
+              },
             },
             {
-              user: { id: userId }
-            }
-          ]
-        })
-        await chat.save()
+              user: {
+                id: userId,
+              },
+            },
+          ],
+        });
+        await chat.save();
+        isNew = true;
       }
-    } else if (userId) {
+    } else if (chatId) {
       chat = await this.chatRepo.findOne({
         where: { id: chatId },
-        relations: ['participants', 'participants.users'],
-      })
-      if (!chat || !chat.participants.find((participants) => participants.user.id === myUser.id)) {
-        throw new NotFoundException()
-      } else return false
-    }
-    return chat
+        relations: ['participants', 'participants.user'],
+      });
+      if (
+        !chat ||
+        !chat.participants.find(
+          (participant) => participant.user.id === myUser.id,
+        )
+      ) {
+        throw new NotFoundException();
+      }
+    } else return {};
+
+    return { chat, isNew };
   }
+  async sendMessage(params: SendMessageDto) {
+    let { userId, chatId } = params;
 
+    let myUser = await this.cls.get<User>('user');
+    let { chat, isNew } = await this.findOrCreateChat({ userId, chatId });
 
-  async sendMesssage(params: SendMessageDto) {
-    let { chatId, userId } = params
-
-    const myUser = await this.cls.get<User>('user')
-
-    let chat = await this.findOrCreateChat({ chatId, userId })
-
-    if (!chat) throw new BadRequestException()
+    if (!chat) throw new BadRequestException();
 
     let message = this.messageRepo.create({
       chat: {
-        id: chat.id
+        id: chat.id,
       },
       message: params.messsage,
       sender: {
-        id: myUser.id
+        id: myUser.id,
       },
-      readBy: [myUser.id]
-    })
-    await message.save()
+      readBy: [myUser.id],
+    });
 
-    chat.lastMessage = { id: message.id }
+    await message.save();
+
+    chat.lastMessage = { id: message.id } as MessageEntity;
 
     chat.participants.map((participant) => {
-      if (participant.user.id === myUser.id) return participant
+      if (participant.user.id === myUser.id) return participant;
       else {
-        participant.unreadCount++
+        participant.unreadCount++;
       }
-    })
+    });
 
-    await chat.save()
+    await chat.save();
+
+    if (isNew) {
+      this.eventEmitter.emit('chat.create', { chat, message });
+    } else {
+      this.eventEmitter.emit('chat.update', { chat, message });
+    }
+    this.eventEmitter.emit('message.create', { chat, message });
+
+    // await Promise.all(
+    //   chat.participants.map((p) =>
+    //     this.redisService.delete(`chatlist${p.user.id}`),
+    //   ),
+    // );
 
     return {
       status: true,
-      message
-    }
+      message: 'Message is sent',
+    };
   }
 }
 
