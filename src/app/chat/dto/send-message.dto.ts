@@ -17,7 +17,7 @@ export class SendMessageDto {
 
   @Type()
   @IsString()
-  @Length(3, 800)
+  @Length(1, 800)
   @ApiProperty()
   messsage: string;
 }
