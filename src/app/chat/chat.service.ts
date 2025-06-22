@@ -36,9 +36,9 @@ export class ChatService {
   }
 
 
-  async getChats() {
+  // Sizin getChats() metodunuzda dəyişiklik
+async getChats() {
     const myUser = await this.cls.get<User>('user')
-
 
     let cacheData = await this.redisService.get(`chatlist${myUser.id}`);
     if (cacheData) {
@@ -53,11 +53,12 @@ export class ChatService {
       .leftJoin('lastMessage.sender', 'sender')
       .leftJoin('sender.profilePicture', 'senderProfilePicture')
       .leftJoin('chat.participants', 'participants')
-      .leftJoin('participants.user', 'users')
+      .leftJoinAndSelect('participants.user', 'users') // users-i seçib JOIN edin ki, profilePicture da gəlsin
+      .leftJoinAndSelect('users.profilePicture', 'userProfilePicture') // user-in profilePicture-unu da JOIN edin
       .leftJoin('chat.participants', 'myParticipant')
       .where(`myParticipant.userId=:userId`, { userId: myUser.id })
       .orderBy('lastMessage.createdAt', 'DESC') 
-      .getMany()
+      .getMany();
 
     let result = chats.map((chat) => {
       let myParticipant = chat.participants.find(
@@ -67,14 +68,20 @@ export class ChatService {
         ...chat,
         unreadCount: myParticipant.unreadCount,
         everyoneRead: !chat.participants.find((p) => p.unreadCount > 0),
-        participants: undefined,
+        // participants: undefined, <-- Bu sətri silin və ya dəyişdirin
+        // participants propertisi indi lazım olacaq
+        participants: chat.participants.map(p => ({
+            id: p.user.id,
+            userName: p.user.userName,
+            profilePicture: p.user.profilePicture ? p.user.profilePicture.url : null // URL-i alın
+        })),
       };
     });
 
     await this.redisService.set(`chatlist${myUser.id}`, JSON.stringify(result));
 
     return result;
-  }
+}
 
   async getChatMessages(chatId: number, params: GetChatMessagesDto) {
     const { limit = 10, page = 0 } = params;
