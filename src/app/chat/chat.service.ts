@@ -13,13 +13,13 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { CHAT_LIST_SELECT, CHAT_MESSAGES_SELECT } from './chat.select';
 import { GetChatMessagesDto } from './dto/get-chat-messages.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RedisService } from 'src/shared/libs/redis/redis.service';
+// import { RedisService } from 'src/shared/libs/redis/redis.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 
 @Injectable()
 export class ChatService {
   constructor(
-    private redisService: RedisService,
+    // private redisService: RedisService,
     private eventEmitter: EventEmitter2,
     private cls: ClsService,
     @InjectRepository(Chat)
@@ -37,15 +37,8 @@ export class ChatService {
 
 
   // Sizin getChats() metodunuzda dəyişiklik
-async getChats() {
+  async getChats() {
     const myUser = await this.cls.get<User>('user')
-
-    let cacheData = await this.redisService.get(`chatlist${myUser.id}`);
-    if (cacheData) {
-      console.log('DATA FROM CACHE');
-      return JSON.parse(cacheData.toString());
-    }
-
     let chats = await this.chatRepo
       .createQueryBuilder('chat')
       .select(CHAT_LIST_SELECT)
@@ -57,7 +50,7 @@ async getChats() {
       .leftJoinAndSelect('users.profilePicture', 'userProfilePicture') // user-in profilePicture-unu da JOIN edin
       .leftJoin('chat.participants', 'myParticipant')
       .where(`myParticipant.userId=:userId`, { userId: myUser.id })
-      .orderBy('lastMessage.createdAt', 'DESC') 
+      .orderBy('lastMessage.createdAt', 'DESC')
       .getMany();
 
     let result = chats.map((chat) => {
@@ -68,20 +61,16 @@ async getChats() {
         ...chat,
         unreadCount: myParticipant.unreadCount,
         everyoneRead: !chat.participants.find((p) => p.unreadCount > 0),
-        // participants: undefined, <-- Bu sətri silin və ya dəyişdirin
-        // participants propertisi indi lazım olacaq
         participants: chat.participants.map(p => ({
-            id: p.user.id,
-            userName: p.user.userName,
-            profilePicture: p.user.profilePicture ? p.user.profilePicture.url : null // URL-i alın
+          id: p.user.id,
+          userName: p.user.userName,
+          profilePicture: p.user.profilePicture ? p.user.profilePicture.url : null // URL-i alın
         })),
       };
     });
 
-    await this.redisService.set(`chatlist${myUser.id}`, JSON.stringify(result));
-
     return result;
-}
+  }
 
   async getChatMessages(chatId: number, params: GetChatMessagesDto) {
     const { limit = 10, page = 0 } = params;
@@ -197,7 +186,7 @@ async getChats() {
     let myUser = await this.cls.get<User>('user');
     let { chat, isNew } = await this.findOrCreateChat({ userId, chatId });
 
-    if (!chat) throw new BadRequestException();
+    if (!chat) throw new BadRequestException(); // 'new' açar sözü iki dəfə yazılıb, biri silindi
 
     let message = this.messageRepo.create({
       chat: {
@@ -230,17 +219,13 @@ async getChats() {
     }
     this.eventEmitter.emit('message.create', { chat, message });
 
-    await Promise.all(
-      chat.participants.map((p) =>
-        this.redisService.delete(`chatlist${p.user.id}`),
-      ),
-    );
+    
 
     return {
       status: true,
       message: 'Message is sent',
     };
-  }
+  };
 
 
   async createGroup(body: CreateGroupDto) {
@@ -256,13 +241,9 @@ async getChats() {
         },
       })),
     });
-    await Promise.all(
-      chat.participants.map((p) =>
-        this.redisService.delete(`chatlist${p.user.id}`),
-      ),
-    );
+
     await chat.save();
     return chat;
-  }
+}
 }
 
