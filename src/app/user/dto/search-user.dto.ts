@@ -14,7 +14,7 @@ export class SearchUserDto {
   @Type()
   @IsString()
   @ApiProperty()
-  @MinLength(3)
+  @MinLength(1)
   searchParam: string;
 
   @Type()
